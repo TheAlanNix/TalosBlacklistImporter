@@ -44,6 +44,9 @@ INTERVAL = 3600
 # Snort Blocklist Cache
 SNORT_DATA_FILE = "blocklist.json"
 
+# Stealthwatch Constants
+XSRF_HEADER_NAME = 'X-XSRF-TOKEN'
+
 ####################
 #    FUNCTIONS     #
 ####################
@@ -189,7 +192,12 @@ def get_access_token():
         response = API_SESSION.post(url, data=login_credentials, verify=False)
 
         # If the request was successful, then proceed
+        # Set XSRF token for future requests
         if response.status_code == 200:
+            for cookie in response.cookies:
+                if cookie.name == 'XSRF-TOKEN':
+                    API_SESSION.headers.update({XSRF_HEADER_NAME: cookie.value})
+                    break
             print("Successfully Authenticated.")
 
             return response.text
